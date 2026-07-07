@@ -44,8 +44,9 @@ graph TD
 ```markdown
 web-db-pod/
 ├── README.md
+├── db.env.example      # copy to db.env and fill in
 └── html/
-└── index.html
+    └── index.html
 ```
 
 ---
@@ -63,9 +64,14 @@ podman volume ls // verify volume created properly
 ```
 
 ## Step 3: Run MariaDB Container (Volume-backed)
+Keep credentials out of the command line and out of git: copy `db.env.example` to `db.env` (gitignored) and pass it with `--env-file`.
 ```bash
-podman run -d --name mariadb-container --pod web-db-pod -v mariadb-data-vol:/var/lib/mysql:Z -e MYSQL_USER=appuser -e MYSQL_PASSWORD=apppassword -e MYSQL_DATABASE=appdb -e MYSQL_ROOT_PASSWORD=rootpassword registry.redhat.io/rhel9/mariadb-105:latest
-podman ps // verify container created and running
+cp db.env.example db.env    # then edit db.env and set real values
+podman run -d --name mariadb-container --pod web-db-pod \
+  -v mariadb-data-vol:/var/lib/mysql:Z \
+  --env-file db.env \
+  registry.redhat.io/rhel9/mariadb-105:latest
+podman ps   # verify container created and running
 ```
 
 ## Step 4: Prepare Web Content on Host (Bind Mount)
